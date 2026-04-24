@@ -4,4 +4,10 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "bs4>=0.0.2",
+    "lxml>=6.1.0",
+    "pydantic>=2.13.3",
+    "requests>=2.33.1",
+    "rich>=15.0.0",
+]

@@ -1,66 +1,9 @@
-from bs4 import BeautifulSoup
-import requests
 from rich.progress import track
 from constants import BASE_URL, PYTHON_URL
 from models.post_model import JobPostModel
 from utils.scraper_helpers import safe_int_from_list, safe_text, safe_attr
-
-
-def get_soup(url: str) -> BeautifulSoup | None:
-    """
-    Fetches and parses a webpage into a BeautifulSoup object.
-    Args:
-        page_url (str): The full URL of the page to fetch.
-    Returns:
-        BeautifulSoup: Parsed HTML content of the page.
-    """
-    try:
-        response = requests.get(
-            url,
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=10
-        )
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, "lxml")
-        return soup
-
-    except requests.RequestException as e:
-        print(f"[ERROR] Failed to fetch {url}: {e}")
-        return None
-
-
-def get_all_count_of_posts(count_pages, base_url):
-    """
-    Extracts the total count of posts from the webpage.
-    Args:
-        count_pages (int): The number of pages to iterate through.
-        base_url (str): The base URL for the pages.
-    Returns:
-        int: Total count of posts.
-    """
-    total_posts = 0
-    for page in track(range(count_pages), description="Processing..."):
-        url = f"{base_url}{page+1}"
-        print(url)
-        soup = get_soup(url)
-        articles = soup.find_all("article")
-        articles_search = int(len(articles))
-        total_posts += articles_search
-    return total_posts
-
-
-def get_total_count_pages(soup):
-    """
-    Extracts the total number of pages from the pagination section of the webpage.
-    Args:
-        soup (BeautifulSoup): Parsed HTML content of the page.
-    Returns:
-        int: The total number of pages.
-    """
-    pages_ul = soup.find("ul", class_="pages_ul_inner")
-    pages_li = pages_ul.find_all("li")[-1:]
-    last_page_number = pages_li[0].find("a").get_text()
-    return int(last_page_number)
+from utils.http_get_soup import get_soup
+from utils.pagination import get_total_count_pages
 
 
 def scrape_post(job_card_article):
@@ -97,9 +40,18 @@ def scrape_post(job_card_article):
 
 
 def scrape_all_posts(url):
+    """
+    Scrapes all job posts from the given URL and returns a list of job post data.
+    Args:
+        url (str): The base URL to scrape job posts from.
+    Returns:
+        all_posts (list): A list of dictionaries containing job post data.
+    """
     soup = get_soup(url)
     count_pages = get_total_count_pages(soup)
     print(f"Total pages: {count_pages}")
+
+    all_posts = []
 
     for page in track(range(count_pages), description="Processing..."):
         page_url = f"{url}{page+1}"
@@ -108,26 +60,19 @@ def scrape_all_posts(url):
 
         articles = page_soup.find_all("article")
 
-        for article in articles:
+        for article in track(articles, description="Processing job posts ..."):
             try:
                 job_card = scrape_post(article)
             except Exception as e:
                 print(f"Failed post: {e}")
 
             post_obj_model = JobPostModel(**job_card)
+            post_json = post_obj_model.model_dump(mode="json")
+            all_posts.append(post_json)
 
-            print("= "*20)
-            print(post_obj_model)
+    return all_posts
 
 
 if __name__ == "__main__":
-    #soup = get_soup(BASE_URL)
-    #soup = get_soup(PYTHON_URL)
-    #total_pages = get_total_count_pages(soup)
-    #print(f"Total pages: {total_pages}")
-    #total_posts = get_all_count_of_posts(total_pages, PYTHON_URL)
-    #print(f"Total posts: {total_posts}")
-
-    #scrape_post(PYTHON_URL)
     print(scrape_all_posts(PYTHON_URL))
     print("DONE!!!")

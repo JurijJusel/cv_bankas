@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import requests
 import json
 import time
-from srap_preprocessing import upload_time,count_time,try_salary,try_applicants,try_post_date,count_pages,count_posts,stopwatch_time,try_post_description_full,try_city
+from crawlers.srap_preprocessing import upload_time,count_time,try_salary,try_applicants,try_post_date,count_pages,count_posts,stopwatch_time,try_post_description_full,try_city
 import pandas as pd
 from utils.file import create_csv, read_csv, create_json
 from tqdm import tqdm

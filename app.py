@@ -19,10 +19,10 @@ class Crawler:
     def download_url(self):
         response = requests.get(self.url, headers=self.headers)  # timeout=1
         return response.headers
-        
+
 
     def download_content(self, pages_index):
-        print('total pages:', pages_index) 
+        print('total pages:', pages_index)
         for page in tqdm(range(1, pages_index+1 ), ncols=100, colour="green", desc='Pages scraping progress'):
             full_source = requests.get(f'{self.url}{page}', headers=self.headers)
             full_soup = BeautifulSoup(full_source.content, 'lxml')
@@ -37,17 +37,17 @@ class Crawler:
                 salary = try_salary(article)
                 post_date = try_post_date(article)
                 upload_post = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(upload_time(post_date)))
-                
+
                 post_source = requests.get(post_url)
                 post_soup = BeautifulSoup(post_source.content, 'lxml')
                 description = post_soup.find_all('section', itemprop='description')[0].get_text()
                 applicants_value = try_applicants(post_soup)
 
                 post = Post(post_id,post_url,img_url,position,company,city,salary,post_date,upload_post,description,applicants_value)
-               
-                self.posts.append(post.data_dict())   
+
+                self.posts.append(post.data_dict())
         return self.posts
-    
+
 
     def get_last_page_index(self):
         page_index = 1
@@ -57,10 +57,10 @@ class Crawler:
                 soup = BeautifulSoup(req.content, 'lxml')
                 if soup.select_one('[rel=next]') is None:
                     break
-                page_index += 1         
+                page_index += 1
         return page_index
 
-    
+
     def create_df(self):
         data_csv = {
             'website': "www.cvbankas.lt",
@@ -77,8 +77,8 @@ class Crawler:
         pages_index = self.get_last_page_index()
         page_content = self.download_content(pages_index)
         return page_content
-    
-      
+
+
     def run(self):
         start_time = time.perf_counter()
         self.time_now = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -90,7 +90,7 @@ class Crawler:
         companies_df = read_csv('companies.csv')
         print(create_companies_df(data_df, companies_df))
         print(data_df)
-        
+
 
 if __name__ == '__main__':
     Crawler(url='https://www.cvbankas.lt?page=').run()

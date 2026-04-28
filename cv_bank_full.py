@@ -6,10 +6,12 @@ from srap_preprocessing import upload_time,count_time,try_salary,try_applicants,
 import pandas as pd
 from utils.file import create_csv, read_csv, create_json
 from tqdm import tqdm
+from rich import print
 
- 
-start_time = time.perf_counter()
-time_now = time.strftime("%Y-%m-%d %H:%M:%S")
+
+
+#start_time = time.perf_counter()
+#time_now = time.strftime("%Y-%m-%d %H:%M:%S")
 
 count_all_posts = count_posts()
 print(f'total posts: {count_all_posts}')
@@ -39,7 +41,7 @@ for page in tqdm(range(1, count_all_pages+1), ncols=100, colour="green", desc='P
         applicants_value = try_applicants(post_soup)
         post_description_full = try_post_description_full(post_soup)
         # post_description_full = post_soup.find_all('section', itemprop='description')[0].get_text()
-   
+
         post_data = {
             "post_descrip": post_description_full,
             "post_id": post_id,

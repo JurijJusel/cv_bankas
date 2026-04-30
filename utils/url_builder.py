@@ -1,4 +1,4 @@
-def build_url(category):
+def build_url_by_category(category):
     """
     Build the URL for scraping job posts based on the given category.
     """

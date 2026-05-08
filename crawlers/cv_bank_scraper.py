@@ -71,8 +71,3 @@ def scrape_all_posts(url):
             all_posts.append(post_json)
 
     return all_posts
-
-
-if __name__ == "__main__":
-    print(scrape_all_posts(PYTHON_URL))
-    print("DONE!!!")

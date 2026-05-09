@@ -23,3 +23,11 @@ def get_soup(url: str) -> BeautifulSoup | None:
     except requests.RequestException as e:
         print(f"[ERROR] Failed to fetch {url}: {e}")
         return None
+
+
+def build_url_by_category(category):
+    """
+    Build the URL for scraping job posts based on the given category.
+    """
+    url_search_category = "https://www.cvbankas.lt"
+    return f"{url_search_category}/?keyw=&padalinys%5B%5D={category}"

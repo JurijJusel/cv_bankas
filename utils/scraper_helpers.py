@@ -1,6 +1,7 @@
 import re
+import requests
+from bs4 import BeautifulSoup
 from rich.progress import track
-from utils.http_get_soup import get_soup
 
 
 def safe_text(parent, tag, class_=None, default=None):
@@ -112,3 +113,46 @@ def get_total_count_pages(soup):
     pages_li = pages_ul.find_all("li")[-1:]
     last_page_number = pages_li[0].find("a").get_text()
     return int(last_page_number)
+
+
+def filter_new_posts(existing_data: list, new_data: list) -> list:
+    """
+    Filters out posts that already exist based on post_id.
+    """
+    existing_ids = {item["post_id"] for item in existing_data}
+
+    return [
+        item for item in new_data
+        if item["post_id"] not in existing_ids
+    ]
+
+
+def get_soup(url: str) -> BeautifulSoup | None:
+    """
+    Fetches and parses a webpage into a BeautifulSoup object.
+    Args:
+        page_url (str): The full URL of the page to fetch.
+    Returns:
+        BeautifulSoup: Parsed HTML content of the page.
+    """
+    try:
+        response = requests.get(
+            url,
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=10
+        )
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "lxml")
+        return soup
+
+    except requests.RequestException as e:
+        print(f"[ERROR] Failed to fetch {url}: {e}")
+        return None
+
+
+def build_url_by_category(category):
+    """
+    Build the URL for scraping job posts based on the given category.
+    """
+    url_search_category = "https://www.cvbankas.lt"
+    return f"{url_search_category}/?keyw=&padalinys%5B%5D={category}"

@@ -1,17 +1,6 @@
 from pathlib import Path
 import json
-
-
-def filter_new_posts(existing_data: list, new_data: list) -> list:
-    """
-    Filters out posts that already exist based on post_id.
-    """
-    existing_ids = {item["post_id"] for item in existing_data}
-
-    return [
-        item for item in new_data
-        if item["post_id"] not in existing_ids
-    ]
+from utils.scraper_helpers import filter_new_posts
 
 
 def write_data_to_json_file(data: list | dict, json_file_path: str) -> str:

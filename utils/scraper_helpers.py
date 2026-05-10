@@ -1,4 +1,7 @@
 import re
+import requests
+from bs4 import BeautifulSoup
+from rich.progress import track
 
 
 def safe_text(parent, tag, class_=None, default=None):
@@ -76,3 +79,80 @@ def safe_attr(parent, tag, attr, class_=None, default=None):
         return el.get(attr) if el and el.get(attr) else default
     except AttributeError:
         return default
+
+
+def get_all_count_of_posts(count_pages, base_url):
+    """
+    Extracts the total count of posts from the webpage.
+    Args:
+        count_pages (int): The number of pages to iterate through.
+        base_url (str): The base URL for the pages.
+    Returns:
+        int: Total count of posts.
+    """
+    total_posts = 0
+    for page in track(range(count_pages), description="Processing..."):
+        url = f"{base_url}{page+1}"
+        print(url)
+        soup = get_soup(url)
+        articles = soup.find_all("article")
+        articles_search = int(len(articles))
+        total_posts += articles_search
+    return total_posts
+
+
+def get_total_count_pages(soup):
+    """
+    Extracts the total number of pages from the pagination section of the webpage.
+    Args:
+        soup (BeautifulSoup): Parsed HTML content of the page.
+    Returns:
+        int: The total number of pages.
+    """
+    pages_ul = soup.find("ul", class_="pages_ul_inner")
+    pages_li = pages_ul.find_all("li")[-1:]
+    last_page_number = pages_li[0].find("a").get_text()
+    return int(last_page_number)
+
+
+def filter_new_posts(existing_data: list, new_data: list) -> list:
+    """
+    Filters out posts that already exist based on post_id.
+    """
+    existing_ids = {item["post_id"] for item in existing_data}
+
+    return [
+        item for item in new_data
+        if item["post_id"] not in existing_ids
+    ]
+
+
+def get_soup(url: str) -> BeautifulSoup | None:
+    """
+    Fetches and parses a webpage into a BeautifulSoup object.
+    Args:
+        page_url (str): The full URL of the page to fetch.
+    Returns:
+        BeautifulSoup: Parsed HTML content of the page.
+    """
+    try:
+        response = requests.get(
+            url,
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=10
+        )
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "lxml")
+        return soup
+
+    except requests.RequestException as e:
+        print(f"[ERROR] Failed to fetch {url}: {e}")
+        return None
+
+
+def build_url_by_category(category):
+    """
+    Build the URL for scraping job posts based on the given category.
+    """
+    url_search_category = "https://www.cvbankas.lt"
+    return f"{url_search_category}/?keyw=&padalinys%5B%5D={category}"

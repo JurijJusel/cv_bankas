@@ -1,9 +1,11 @@
 from rich.progress import track
-from constants import BASE_URL, PYTHON_URL
 from models.post_model import JobPostModel
-from utils.scraper_helpers import safe_int_from_list, safe_text, safe_attr
-from utils.http_get_soup import get_soup
-from utils.pagination import get_total_count_pages
+from utils.scraper_helpers import (safe_int_from_list,
+                                   safe_text,
+                                   safe_attr,
+                                   get_total_count_pages,
+                                   get_soup)
+
 
 
 def scrape_post(job_card_article):

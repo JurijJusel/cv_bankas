@@ -9,7 +9,7 @@ CV_BANKAS_JSON_FILE_PATH = "data/cv_bankas_posts.json"
 
 
 # List of job categories to scrape with their corresponding category IDs
-categories = {
+CATEGORIES = {
     "Administration_work_safety": 202,
     "Environmental_sustainability": 1161,
     "Security_protection": 945,

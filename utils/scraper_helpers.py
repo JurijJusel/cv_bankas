@@ -2,6 +2,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from rich.progress import track
+from constants import CATEGORIES
 
 
 def safe_text(parent, tag, class_=None, default=None):
@@ -155,4 +156,26 @@ def build_url_by_category(category):
     Build the URL for scraping job posts based on the given category.
     """
     url_search_category = "https://www.cvbankas.lt"
-    return f"{url_search_category}/?keyw=&padalinys%5B%5D={category}"
+    return f"{url_search_category}/?keyw=&padalinys%5B%5D={category}&page="
+
+
+def get_category_url(categ_id):
+    """
+    Get the URL for scraping job posts based on the given category ID.
+    Args:
+        categ_id (int): The category ID to get the URL for.
+        shoose from CATEGORIES dict in constants.py
+    Returns:
+        str: The URL corresponding to the given category ID,
+        or a message if the category is not found.
+    """
+    categ_id = int(categ_id)
+
+    if categ_id not in CATEGORIES.values():
+        print(f"Category '{categ_id}' not found.")
+        return None
+
+    for categ_name, categ_num in CATEGORIES.items():
+        if categ_num == categ_id:
+            print(f"{categ_id} belongs to: {categ_name}")
+            return build_url_by_category(categ_id)
